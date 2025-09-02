@@ -1,17 +1,20 @@
-import "./App.css";
 import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
 import { TrayIcon } from "@tauri-apps/api/tray";
-import { useEffect, useState } from "react";
-import { buildRegionsSubmenu } from "./shared/utils/buildRegionsSubmenu";
 import { load } from "@tauri-apps/plugin-store";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import "./App.css";
 import { usePrayerTimes } from "./shared/api/usePrayerTimes";
+import { buildRegionsSubmenu } from "./shared/utils/buildRegionsSubmenu";
 import { getNextPrayerTime } from "./shared/utils/getNextPrayerTime";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const store = await load("store.json");
 
 const App = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("Pop");
   const [tray, setTray] = useState<TrayIcon | null>(null);
+  const navigate = useNavigate()
 
   const { data: prayerData, refetch: prayerTimeRefetch } = usePrayerTimes(selectedRegion);
 
@@ -37,24 +40,27 @@ const App = () => {
               await MenuItem.new({
                 id: "daily",
                 text: "Kunlik ✓",
-                action: () => console.log("Kunlik tanlandi"),
+                action: () => navigate("/daily-times"),
               }),
               await MenuItem.new({
                 id: "weekly",
                 text: "Haftalik",
-                action: () => console.log("Haftalik tanlandi"),
+                action: () => navigate("/weekly-times"),
               }),
               await MenuItem.new({
                 id: "monthly",
                 text: "Oylik",
-                action: () => console.log("Oylik tanlandi"),
+                action: () => navigate("/monthly-times"),
               }),
             ],
           }),
           await MenuItem.new({
             id: "quit",
             text: "Chiqish",
-            action: () => window.close(),
+            action: async () => {
+              const appWindow = await getCurrentWindow()
+              await appWindow.hide()
+            },
           }),
         ],
       });
@@ -78,7 +84,9 @@ const App = () => {
     console.log(JSON.stringify(prayerData?.times))
   }, [tray, prayerData]);
 
-  return "";
+  return (
+    <h1>salom</h1>
+  );
 };
 
 export default App;
