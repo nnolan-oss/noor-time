@@ -9,7 +9,7 @@ export const regionsWithDistricts = {
         "Marg'ilon", "Qo'qon", "Quva", "Rishton", "Shahrixon"
     ],
     "Namangan Viloyati": [
-        "Namangan", "Kosonsoy"
+        "Namangan", "Kosonsoy", "Pop"
     ],
     "Buxoro Viloyati": [
         "Buxoro", "Gazli"

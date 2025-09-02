@@ -16,7 +16,7 @@ const App = () => {
   const [tray, setTray] = useState<TrayIcon | null>(null);
   const navigate = useNavigate()
 
-  const { data: prayerData, refetch: prayerTimeRefetch } = usePrayerTimes(selectedRegion);
+  const { data: prayerData, isLoading, refetch: prayerTimeRefetch } = usePrayerTimes(selectedRegion);
 
   useEffect(() => {
     const init = async () => {
@@ -34,26 +34,26 @@ const App = () => {
             text: "Hududlar",
             items: regionsSubmenus,
           }),
-          await Submenu.new({
-            text: "Sozlamalar",
-            items: [
-              await MenuItem.new({
-                id: "daily",
-                text: "Kunlik ✓",
-                action: () => navigate("/daily-times"),
-              }),
-              await MenuItem.new({
-                id: "weekly",
-                text: "Haftalik",
-                action: () => navigate("/weekly-times"),
-              }),
-              await MenuItem.new({
-                id: "monthly",
-                text: "Oylik",
-                action: () => navigate("/monthly-times"),
-              }),
-            ],
-          }),
+          // await Submenu.new({
+          //   text: "Sozlamalar",
+          //   items: [
+          //     await MenuItem.new({
+          //       id: "daily",
+          //       text: "Kunlik ✓",
+          //       action: () => navigate("/daily-times"),
+          //     }),
+          //     await MenuItem.new({
+          //       id: "weekly",
+          //       text: "Haftalik",
+          //       action: () => navigate("/weekly-times"),
+          //     }),
+          //     await MenuItem.new({
+          //       id: "monthly",
+          //       text: "Oylik",
+          //       action: () => navigate("/monthly-times"),
+          //     }),
+          //   ],
+          // }),
           await MenuItem.new({
             id: "quit",
             text: "Chiqish",
@@ -73,19 +73,24 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (tray && prayerData) {
+    if (!tray || !prayerData) return;
 
-      const pp = getNextPrayerTime(prayerData?.times)
+    const updateTrayTitle = () => {
+      const prayerTime = getNextPrayerTime(prayerData.times);
+      tray.setTitle(isLoading ? ".-." : `${prayerTime.key}: ${prayerTime.time}`);
+    };
+    updateTrayTitle();
+    const intervalId = setInterval(() => {
+      updateTrayTitle();
+    }, 60_000);
 
-      tray.setTitle(`${pp.key}: ${pp.time}`);
-      console.log(pp.key, "sss");
-      prayerTimeRefetch()
-    }
-    console.log(JSON.stringify(prayerData?.times))
+    return () => clearInterval(intervalId);
   }, [tray, prayerData]);
 
+
   return (
-    <h1>salom</h1>
+    ""
+    // <h1>data:{JSON.stringify(prayerData)} {JSON.stringify(isLoading)}</h1>
   );
 };
 

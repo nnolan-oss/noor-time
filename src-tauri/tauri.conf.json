@@ -19,8 +19,8 @@
         "maxWidth": 800,
         "maxHeight": 600,
         "minHeight": 600,
-        "visible": true,
-        "decorations": true
+        "visible": false,
+        "decorations": false
       }
     ],
     "security": {
