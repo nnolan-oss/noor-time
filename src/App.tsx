@@ -2,7 +2,6 @@ import { Menu, MenuItem, Submenu } from "@tauri-apps/api/menu";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { load } from "@tauri-apps/plugin-store";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import "./App.css";
 import { usePrayerTimes } from "./shared/api/usePrayerTimes";
 import { buildRegionsSubmenu } from "./shared/utils/buildRegionsSubmenu";
@@ -14,9 +13,9 @@ const store = await load("store.json");
 const App = () => {
   const [selectedRegion, setSelectedRegion] = useState<string>("Pop");
   const [tray, setTray] = useState<TrayIcon | null>(null);
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
 
-  const { data: prayerData, isLoading, refetch: prayerTimeRefetch } = usePrayerTimes(selectedRegion);
+  const { data: prayerData, isLoading } = usePrayerTimes(selectedRegion);
 
   useEffect(() => {
     const init = async () => {
