@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*" 
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -11,31 +11,58 @@ permissions:
 jobs:
   release:
     strategy:
+      fail-fast: false
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
+    
     runs-on: ${{ matrix.platform }}
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
-      - name: Install Node.js
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build & Release Tauri App
+      - name: Build and release Tauri app
         uses: tauri-apps/tauri-action@v0
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "Release ${{ github.ref_name }}"
-          releaseBody: "Automated release of version ${{ github.ref_name }}"
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "noor-time ${{ github.ref_name }}"
+          releaseBody: |
+            # Noor Time Release ${{ github.ref_name }}
+            
+            ## What's Changed
+            - Automated release of version ${{ github.ref_name }}
+            - Cross-platform builds for macOS, Linux, and Windows
+            
+            ## Download
+            Choose the appropriate file for your platform:
+            - **macOS**: `.dmg` file
+            - **Linux**: `.AppImage` or `.deb` file  
+            - **Windows**: `.msi` file
+            
+            ## Installation
+            Download and run the installer for your platform. The app will automatically check for updates.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
